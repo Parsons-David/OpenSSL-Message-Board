@@ -16,6 +16,16 @@ def authenticate(data):
 def get_groups():
     return ["CS", "Math", "Physics", "Security", "Art", "Music", "Sports"]
 
+def get_messages(group):
+    return [{
+        "USER": "PK",
+        "TIMESTAMP" : "NOW",
+        "MESSAGE" : "WHAT IS UP!!"
+    }]
+
+def post_message(group, message):
+    pass
+
 # Correct Name?
 MAX_CLIENTS = 10
 # Connection Timeout in seconds
@@ -95,9 +105,34 @@ class MessageBoardServer():
                             client.send(encrypt(pickle.dumps(response)))
 
                         elif command == "GET":
-                            pass
-                        elif command == "PUT":
-                            pass
+                            group = message["BODY"]["GROUP"]
+
+                            response = copy.deepcopy(state.MESSAGE)
+                            response['COMMAND'] = state.GET
+                            response['BODY'] = copy.deepcopy(state.get_response)
+
+                            response['BODY']['GROUP'] = group
+                            response['BODY']['MESSAGES'] = get_messages(group)
+                            response['BODY']['GROUPS'] = get_groups()
+
+                            print("\tSending: %s" % (response))
+
+                            client.send(encrypt(pickle.dumps(response)))
+                        elif command == "POST":
+                            group = message["BODY"]["GROUP"]
+                            new_message = message["BODY"]["MESSAGE"]
+
+                            post_message(group, new_message)
+
+                            response = copy.deepcopy(state.MESSAGE)
+                            response['COMMAND'] = state.POST
+                            response['BODY'] = copy.deepcopy(state.get_response)
+
+                            response['BODY']['GROUPS'] = get_groups()
+
+                            print("\tSending: %s" % (response))
+
+                            client.send(encrypt(pickle.dumps(response)))
                         # TODO : FIXED
                         else:
                             print("\'%s\' command not recognized." % (command))

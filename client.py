@@ -103,9 +103,53 @@ def main():
                     print('END %s!' % ("Failed" if authenticated else "Succesful"))
 
                 elif command == "GET":
-                    pass
-                elif command == "PUT":
-                    pass
+                    print()
+                    target_group = input('Group: ')
+                    message = copy.deepcopy(state.MESSAGE)
+                    message['COMMAND'] = state.GET
+                    message['BODY'] = copy.deepcopy(state.get_message)
+                    message['BODY']['GROUP'] = target_group
+                    print("\tSending: %s" % (message))
+
+                    sock.send(encrypt(pickle.dumps(message)))
+
+                    # TODO : BUFFER_SIZE
+                    data = sock.recv(BUFFER_SIZE)
+                    response = pickle.loads(decrypt(data))
+
+                    print("\tReceiving: %s" % (response))
+
+                    if response['COMMAND'] != state.GET:
+                        print('GET Reponse Error')
+                        print('Recieved Reponse to Command: %s' % (response["COMMAND"]))
+                    GROUPS = response['BODY']['GROUPS']
+                    messages = response['BODY']['MESSAGES']
+                    print(messages)
+
+                elif command == "POST":
+                    print()
+                    target_group = input('Group: ')
+                    new_message = input('Message: ')
+
+                    message = copy.deepcopy(state.MESSAGE)
+                    message['COMMAND'] = state.POST
+                    message['BODY'] = copy.deepcopy(state.post_message)
+                    message['BODY']['GROUP'] = target_group
+                    message['BODY']['MESSAGE'] = new_message
+                    print("\tSending: %s" % (message))
+
+                    sock.send(encrypt(pickle.dumps(message)))
+
+                    # TODO : BUFFER_SIZE
+                    data = sock.recv(BUFFER_SIZE)
+                    response = pickle.loads(decrypt(data))
+
+                    print("\tReceiving: %s" % (response))
+
+                    if response['COMMAND'] != state.POST:
+                        print('POST Reponse Error')
+                        print('Recieved Reponse to Command: %s' % (response["COMMAND"]))
+                    GROUPS = response['BODY']['GROUPS']
                 else:
                     if command != '':
                         print("\'%s\' command not recognized." % (command))

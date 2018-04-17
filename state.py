@@ -30,9 +30,27 @@ authentication_response = {
 # End Authentication
 
 # GET
+get_message = {
+    "GROUP" : ""
+}
+
+get_response = {
+    "GROUP" : "",
+    "MESSAGES" : [],
+    "GROUPS" : []
+}
+
 # End GET
 
 # POST
+post_message = {
+    "GROUP" : "",
+    "MESSAGE" : ""
+}
+
+post_response = {
+    "GROUPS" : []
+}
 # End POST
 
 # END
