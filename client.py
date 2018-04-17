@@ -10,6 +10,15 @@ def encrypt(data):
 def decrypt(data):
     return data
 
+def print_groups(grps):
+    if len(grps) < 1:
+        return
+    output = grps[0]
+    for g in grps[1:]:
+        output += " - " + g
+    print()
+    print(output)
+
 def main():
     # parse all the arguments to the client
     parser = argparse.ArgumentParser(description='CS 419 OpenSSL Message Board Client')
@@ -28,6 +37,8 @@ def main():
 
     authenticated = False
     BUFFER_SIZE = 1024
+
+    GROUPS = []
 
     try:
         while True:
@@ -62,10 +73,13 @@ def main():
                     print('Recieved Reponse to Command: %s' % (response["COMMAND"]))
 
                 authenticated = response['BODY']['AUTHENTICATED']
+                GROUPS = response['BODY']['GROUPS']
                 print('Authentication %s!' % ("Succesful" if authenticated else "Failed"))
+
             # If you are authenticated
             else:
                 # TODO : Accept other commands
+                print_groups(GROUPS)
                 command = input("Enter a Command>> ")
                 if command == 'END':
                     message = copy.deepcopy(state.MESSAGE)
@@ -93,7 +107,8 @@ def main():
                 elif command == "PUT":
                     pass
                 else:
-                    print("\'%s\' command not recognized." % (command))
+                    if command != '':
+                        print("\'%s\' command not recognized." % (command))
 
     except KeyboardInterrupt as e:
         print("\nGoodbye!")

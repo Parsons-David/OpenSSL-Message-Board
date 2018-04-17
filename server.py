@@ -13,6 +13,9 @@ def decrypt(data):
 def authenticate(data):
     return True
 
+def get_groups():
+    return ["CS", "Math", "Physics", "Security", "Art", "Music", "Sports"]
+
 # Correct Name?
 MAX_CLIENTS = 10
 # Connection Timeout in seconds
@@ -68,6 +71,7 @@ class MessageBoardServer():
 
                         a_rep = copy.deepcopy(state.authentication_response)
                         a_rep['AUTHENTICATED'] = authenticated
+                        a_rep['GROUPS'] = get_groups() if authenticated else []
 
                         response = copy.deepcopy(state.MESSAGE)
                         response['COMMAND'] = state.AUTHENTICATE

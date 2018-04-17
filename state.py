@@ -23,7 +23,8 @@ username_password = {
 # AUTHENTICATED represents a succesful authentication
 # TODO : Created vs Authenticated vs Failed?
 authentication_response = {
-    "AUTHENTICATED" : False
+    "AUTHENTICATED" : False,
+    "GROUPS" : []
 }
 
 # End Authentication
