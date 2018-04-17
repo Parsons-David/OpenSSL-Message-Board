@@ -1,16 +1,14 @@
 #!/usr/bin/python3
 import argparse, json
 import socket
+import pickle
+import state, copy
 
-def login(authentication_dict):
-    # Takes in body of json dictionary used to authenticate
-    # Sends GET request to the "/login" resource
-    # Returns
-    # {
-    #     "authenticated" : True or False,
-    #     "Response" : "<Response Message>"
-    # }
-    pass
+def encrypt(data):
+    return data
+
+def decrypt(data):
+    return data
 
 def main():
     # parse all the arguments to the client
@@ -28,26 +26,75 @@ def main():
     # Attempt Connection to MessageBoardServer
     sock.connect((destinationIP, remote_port))
 
-    message = "TEST"
+    authenticated = False
+    BUFFER_SIZE = 1024
 
     try:
         while True:
+            # Are you authenticated?
+            if not authenticated:
+                # Accept username
+                usr = input("Username: ")
+                # Accept password
+                pwd = input("Password: ")
 
-            # Sends Message to MessageBoardServer
-            sock.send(message.encode('ascii'))
+                u_and_p = copy.deepcopy(state.username_password)
+                u_and_p['USERNAME'] = usr
+                u_and_p['PASSWORD'] = pwd
 
-            # Recive Response Data from MessageBoardServer
-            data = sock.recv(1024)
+                message = copy.deepcopy(state.MESSAGE)
+                message['COMMAND'] = state.AUTHENTICATE
+                message['BODY'] = u_and_p
 
-            # String reprsentation of data recieved from the server
-            print('Received from the server :',str(data.decode('ascii')))
+                print("\tSending: %s" % (message))
 
-            # Wait for END command
-            # TODO : Accept other commands
-            ans = input("Enter a Command>> ")
-            if ans == 'END':
-                break
-                
+                sock.send(encrypt(pickle.dumps(message)))
+
+                # TODO : BUFFER_SIZE
+                data = sock.recv(BUFFER_SIZE)
+
+                response = pickle.loads(decrypt(data))
+
+                print("\tReceiving: %s" % (response))
+
+                if response['COMMAND'] != state.AUTHENTICATE:
+                    print('AUTHENTICATE Reponse Error')
+                    print('Recieved Reponse to Command: %s' % (response["COMMAND"]))
+
+                authenticated = response['BODY']['AUTHENTICATED']
+                print('Authentication %s!' % ("Succesful" if authenticated else "Failed"))
+            # If you are authenticated
+            else:
+                # TODO : Accept other commands
+                command = input("Enter a Command>> ")
+                if command == 'END':
+                    message = copy.deepcopy(state.MESSAGE)
+                    message['COMMAND'] = state.END
+                    message['BODY'] = copy.deepcopy(state.end_message)
+                    print("\tSending: %s" % (message))
+
+                    sock.send(encrypt(pickle.dumps(message)))
+
+                    # TODO : BUFFER_SIZE
+                    data = sock.recv(BUFFER_SIZE)
+                    response = pickle.loads(decrypt(data))
+
+                    print("\tReceiving: %s" % (response))
+
+                    if response['COMMAND'] != state.END:
+                        print('END Reponse Error')
+                        print('Recieved Reponse to Command: %s' % (response["COMMAND"]))
+
+                    authenticated = not response['BODY']['SESSION_ENDED']
+                    print('END %s!' % ("Failed" if authenticated else "Succesful"))
+
+                elif command == "GET":
+                    pass
+                elif command == "PUT":
+                    pass
+                else:
+                    print("\'%s\' command not recognized." % (command))
+
     except KeyboardInterrupt as e:
         print("\nGoodbye!")
 

@@ -1,6 +1,17 @@
 #!/usr/bin/python3
 import argparse, json
 import socket, threading
+import pickle
+import state, copy
+
+def encrypt(data):
+    return data
+
+def decrypt(data):
+    return data
+
+def authenticate(data):
+    return True
 
 # Correct Name?
 MAX_CLIENTS = 10
@@ -33,13 +44,69 @@ class MessageBoardServer():
                 client.settimeout(CONNECTION_TIMEOUT)
                 # Spawn thread to handle new client interations
                 # Starts by authenticating the client
-                threading.Thread(target = self.authenticate_client, args = (client, address_port)).start()
+                threading.Thread(target = self.serve_client, args = (client, address_port)).start()
         except KeyboardInterrupt as e:
             print('\nShutting Down Server....')
 
-    def authenticate_client(self, client, address_port):
-        print("Authenticating Client: %s" % (str(address_port)))
-        self.listenToClient(client, address_port)
+    def serve_client(self, client, address_port):
+        authenticated = False
+        BUFFER_SIZE = 1024
+        while True:
+            try:
+                message = pickle.loads(decrypt(client.recv(BUFFER_SIZE)))
+                if message:
+                    print("\tReceiving: %s" % (message))
+                    # Is client authenticated?
+                    if not authenticated:
+                        if message['COMMAND'] != state.AUTHENTICATE:
+                            print('Command Error!')
+                            print('Recieved \'%s\' Command. Expecting \'%s\' Command' % (response["COMMAND"], state.AUTHENTICATE))
+
+                        u_and_p = message["BODY"]
+
+                        authenticated = authenticate(u_and_p)
+
+                        a_rep = copy.deepcopy(state.authentication_response)
+                        a_rep['AUTHENTICATED'] = authenticated
+
+                        response = copy.deepcopy(state.MESSAGE)
+                        response['COMMAND'] = state.AUTHENTICATE
+                        response['BODY'] = a_rep
+
+                        print("\tSending: %s" % (response))
+                        client.send(encrypt(pickle.dumps(response)))
+
+                    # If Client is authenticated
+                    else:
+                        # TODO : Accept other commands
+                        command = message["COMMAND"]
+                        if command == 'END':
+                            authenticated = False
+
+                            response = copy.deepcopy(state.MESSAGE)
+                            response['COMMAND'] = state.END
+                            response['BODY'] = copy.deepcopy(state.end_response)
+                            print("\tSending: %s" % (response))
+
+                            client.send(encrypt(pickle.dumps(response)))
+
+                        elif command == "GET":
+                            pass
+                        elif command == "PUT":
+                            pass
+                        # TODO : FIXED
+                        else:
+                            print("\'%s\' command not recognized." % (command))
+                            client.close()
+                            return False
+
+                else:
+                    raise error('Client disconnected')
+            except:
+                client.close()
+                return False
+
+
 
     def listenToClient(self, client, address):
         BUFFER_SIZE = 1024
