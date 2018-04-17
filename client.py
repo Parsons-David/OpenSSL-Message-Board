@@ -23,13 +23,18 @@ def main():
     remote_port = args['remoteport']
 
     # Authenticate
-    requests.get("http://%s:%s/" % (destinationIP, remote_port))
+    response = requests.get("http://%s:%s/auth" % (destinationIP, remote_port))
+    print(response.text)
     # Now Accept CLI commands until death
     try:
         while True:
-            pass
+            input("Enter a Command>> ")
+            # Authenticate
+            response = requests.get("http://%s:%s/" % (destinationIP, remote_port))
+            print(response.text)
+
     except KeyboardInterrupt as e:
-        print("Goodbye!")
+        print("\nGoodbye!")
 
 if __name__ == '__main__':
     main()
