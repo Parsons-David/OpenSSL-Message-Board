@@ -3,38 +3,55 @@ import argparse, json
 import socket, threading
 import pickle
 import state, copy
+import message_db as db
+import user_db as auth
 
+# Pass through to user_db backend
 def encrypt(data):
+    # return auth.encrypt
     return data
 
+# Pass through to user_db backend
 def decrypt(data):
+    # return auth.decrypt
     return data
 
+# Pass through to user_db backend
 def authenticate(data):
+    # return auth.authenticate(data)
     return True
 
+# Pass through to message_db backend
 def get_groups():
+    # return db.get_groups()
     return ["CS", "Math", "Physics", "Security", "Art", "Music", "Sports"]
 
+# Pass through to message_db backend
 def get_messages(group):
+    # return db.get_messages(group)
     return [{
         "USER": "PK",
         "TIMESTAMP" : "NOW",
         "MESSAGE" : "WHAT IS UP!!"
     }]
 
+# Pass through to message_db backendQ
 def post_message(group, message):
     pass
 
 # Correct Name?
-MAX_CLIENTS = 10
+QUEUE_SIZE = 5
 # Connection Timeout in seconds
 CONNECTION_TIMEOUT = 60
 # Lock for accessing client data
 # Authentication lock
 # Lock for message data
 
+# Server Object Used to Handle TCP Request
 class MessageBoardServer():
+    # Contructor
+    # Start with an ip
+    # Start with a port
     def __init__(self, ip, port):
         print('Starting Server...')
         self.ip = ip
@@ -42,12 +59,12 @@ class MessageBoardServer():
         # TODO : !!!!!!!
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # TODO : !!!!!!!
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.ip, self.port))
         print('Running Server on port %d...' % (self.port))
 
     def listen(self):
-        self.sock.listen(MAX_CLIENTS)
+        self.sock.listen(QUEUE_SIZE)
         print('CTRL+C to close Server')
         try:
             while True:
@@ -139,23 +156,6 @@ class MessageBoardServer():
                             client.close()
                             return False
 
-                else:
-                    raise error('Client disconnected')
-            except:
-                client.close()
-                return False
-
-
-
-    def listenToClient(self, client, address):
-        BUFFER_SIZE = 1024
-        while True:
-            try:
-                data = client.recv(BUFFER_SIZE)
-                if data:
-                    # Set the response to echo back the recieved data
-                    response = data
-                    client.send(response)
                 else:
                     raise error('Client disconnected')
             except:
