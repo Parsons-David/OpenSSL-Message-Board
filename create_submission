@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+if [ -f "Assignment6.tar" ]; then
+  rm Assignment6.tar
+fi
+tar --exclude=__pycache__ --exclude=.gitignore --exclude=.git -cvf Assignment6.tar *
