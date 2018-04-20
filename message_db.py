@@ -1,15 +1,36 @@
 #!/usr/bin/python3
 import threading
 import state, copy
+import os
+import json
 lock = threading.Lock()
-board = {}
+db = "db.json"
 
 # Returns an array of strings representing the group names
 # of all the groups stored in the database
 # ex: return ["CS", "Math", "Physics", "Security", "Art", "Music", "Sports"]
+
+def build_dict():
+    json_file = open(db, 'a+')
+    string = json_file.read()
+    json_file.close()
+    if string == "":
+        return {}
+    else:
+        dict = json.loads(string)
+        return dict
+
+def write_file(board):
+    myfile = open(db, "a")
+    myfile.seek(0)
+    myfile.truncate()
+    myfile.write(json.dumps(board))
+    myfile.close()
+
 def get_groups():
     grouplist = []
     lock.acquire()
+    board = build_dict()
     try:
         for group in board:
             grouplist.append(group)
@@ -22,10 +43,12 @@ def get_groups():
 # The Dictonary structure can be seen above.
 def get_messages(group):
     # return db.get_messages(group)
-    lock.acquire()
+    
     pm = copy.deepcopy(state.get_message)
     pm["GROUP"] = group
     retval = []
+    lock.acquire()
+    board = build_dict()
     try:
         if group in board:
             retval = copy.deepcopy(board[group])
@@ -38,43 +61,42 @@ def get_messages(group):
 # DOES NOT RETURN ANYTHING
 def post_message(username, group, message):
     
-    lock.acquire()
     pm = copy.deepcopy(state.post_message)
     pm["GROUP"] = group
-    pm["USERNAME"] = username
     pm["MESSAGE"] = message
+    lock.acquire()
     try:
+        board = build_dict()
         if group not in board:
-            print "does not exist."
             board[group] = [pm]
         else:
-            print "exists."
             msglist = board[group]
             msglist.append(pm)
             board[group] = msglist
+        write_file(board)
     finally:
         lock.release()
     
 
 # Write your testing in here
 def main():
-    print "posting."
+    print("posting.")
     message = [{
         "COMMAND" : "open",
         "BODY" : "this is a test!"
     }]
     
-    print message
+    print(message)
     
     post_message("fahad", "CS", message)
     post_message("fahad", "PIZZA", message)
     messages = get_messages("CS")
     
-    print "getting"
+    print("getting")
     for mes in messages:
         print mes
     
-    print "getting groups"
+    print("getting groups")
     grouplist = get_groups()
     for g in grouplist:
         print g
