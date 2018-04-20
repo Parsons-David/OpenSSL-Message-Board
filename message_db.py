@@ -3,6 +3,7 @@ import threading
 import state, copy
 import os
 import json
+import datetime
 lock = threading.Lock()
 db = "db.json"
 
@@ -11,6 +12,7 @@ db = "db.json"
 # ex: return ["CS", "Math", "Physics", "Security", "Art", "Music", "Sports"]
 
 def build_dict():
+    open(db, 'a+')
     with open(db, 'r+') as json_file:
         string = json_file.read()
         json_file.close()
@@ -62,9 +64,11 @@ def get_messages(group):
 # DOES NOT RETURN ANYTHING
 def post_message(username, group, message):
     
-    pm = copy.deepcopy(state.post_message)
-    pm["GROUP"] = group
+    pm = { "MESSAGE" : "" }
     pm["MESSAGE"] = message
+    pm["USERNAME"] = username
+    pm["TIMESTAMP"] = datetime.datetime.now().time().isoformat()
+    
     lock.acquire()
     try:
         board = build_dict()
