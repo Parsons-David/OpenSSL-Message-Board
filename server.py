@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import argparse, json
-import socket, threading
+import socket, threading, ssl
 import pickle
 import state, copy
 import message_db as db
@@ -70,11 +70,16 @@ class MessageBoardServer():
             while True:
                 # Accept a new client connection
                 client, address_port = self.sock.accept()
+
+
+                connstream = ssl.wrap_socket(client, server_side=True, certfile="domain.crt", keyfile="domain.key")
+
                 # Set timeout for new client
-                client.settimeout(CONNECTION_TIMEOUT)
+                connstream.settimeout(CONNECTION_TIMEOUT)
                 # Spawn thread to handle new client interations
                 # Starts by authenticating the client
-                threading.Thread(target = self.serve_client, args = (client, address_port)).start()
+                threading.Thread(target = self.serve_client, args = (connstream, address_port)).start()
+                print('Accepted a new connection!')
         except KeyboardInterrupt as e:
             print('\nShutting Down Server....')
 

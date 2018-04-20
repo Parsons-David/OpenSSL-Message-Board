@@ -3,6 +3,7 @@ import argparse, json
 import socket
 import pickle
 import state, copy
+import ssl
 
 def encrypt(data):
     return data
@@ -32,8 +33,10 @@ def main():
     # Build Socket
     sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
+    ssl_sock = ssl.wrap_socket(sock, cert_reqs=ssl.CERT_REQUIRED, ca_certs='domain.pem')
+
     # Attempt Connection to MessageBoardServer
-    sock.connect((destinationIP, remote_port))
+    ssl_sock.connect((destinationIP, remote_port))
 
     authenticated = False
     BUFFER_SIZE = 1024
@@ -59,10 +62,10 @@ def main():
 
                 print("\tSending: %s" % (message))
 
-                sock.send(encrypt(pickle.dumps(message)))
+                ssl_sock.send(encrypt(pickle.dumps(message)))
 
                 # TODO : BUFFER_SIZE
-                data = sock.recv(BUFFER_SIZE)
+                data = ssl_sock.recv(BUFFER_SIZE)
 
                 response = pickle.loads(decrypt(data))
 
@@ -87,10 +90,10 @@ def main():
                     message['BODY'] = copy.deepcopy(state.end_message)
                     print("\tSending: %s" % (message))
 
-                    sock.send(encrypt(pickle.dumps(message)))
+                    ssl_sock.send(encrypt(pickle.dumps(message)))
 
                     # TODO : BUFFER_SIZE
-                    data = sock.recv(BUFFER_SIZE)
+                    data = ssl_sock.recv(BUFFER_SIZE)
                     response = pickle.loads(decrypt(data))
 
                     print("\tReceiving: %s" % (response))
@@ -111,10 +114,10 @@ def main():
                     message['BODY']['GROUP'] = target_group
                     print("\tSending: %s" % (message))
 
-                    sock.send(encrypt(pickle.dumps(message)))
+                    ssl_sock.send(encrypt(pickle.dumps(message)))
 
                     # TODO : BUFFER_SIZE
-                    data = sock.recv(BUFFER_SIZE)
+                    data = ssl_sock.recv(BUFFER_SIZE)
                     response = pickle.loads(decrypt(data))
 
                     print("\tReceiving: %s" % (response))
@@ -138,10 +141,10 @@ def main():
                     message['BODY']['MESSAGE'] = new_message
                     print("\tSending: %s" % (message))
 
-                    sock.send(encrypt(pickle.dumps(message)))
+                    ssl_sock.send(encrypt(pickle.dumps(message)))
 
                     # TODO : BUFFER_SIZE
-                    data = sock.recv(BUFFER_SIZE)
+                    data = ssl_sock.recv(BUFFER_SIZE)
                     response = pickle.loads(decrypt(data))
 
                     print("\tReceiving: %s" % (response))
@@ -158,7 +161,7 @@ def main():
         print("\nGoodbye!")
 
     # Close Socket Connection
-    sock.close()
+    ssl_sock.close()
 
 if __name__ == '__main__':
     main()
