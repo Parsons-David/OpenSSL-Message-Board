@@ -27,7 +27,7 @@ def get_messages(group):
 # Adds a new message to a given group, cretes the
 # group if it does not yet exist
 # DOES NOT RETURN ANYTHING
-def post_message(group, message):
+def post_message(username, group, message):
     pass
 
 # Write your testing in here

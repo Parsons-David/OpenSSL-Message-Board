@@ -35,8 +35,9 @@ def get_messages(group):
         "MESSAGE" : "WHAT IS UP!!"
     }]
 
-# Pass through to message_db backendQ
-def post_message(group, message):
+# Pass through to message_db backend
+def post_message(username, group, message):
+    # return db.post_message(username, group, message)
     pass
 
 # Correct Name?
@@ -85,6 +86,7 @@ class MessageBoardServer():
 
     def serve_client(self, client, address_port):
         authenticated = False
+        username = None
         BUFFER_SIZE = 1024
         while True:
             try:
@@ -104,6 +106,7 @@ class MessageBoardServer():
                         a_rep = copy.deepcopy(state.authentication_response)
                         a_rep['AUTHENTICATED'] = authenticated
                         a_rep['GROUPS'] = get_groups() if authenticated else []
+                        username = u_and_p["USERNAME"] if authenticated else None
 
                         response = copy.deepcopy(state.MESSAGE)
                         response['COMMAND'] = state.AUTHENTICATE
@@ -118,6 +121,7 @@ class MessageBoardServer():
                         command = message["COMMAND"]
                         if command == 'END':
                             authenticated = False
+                            username = None
 
                             response = copy.deepcopy(state.MESSAGE)
                             response['COMMAND'] = state.END
@@ -144,7 +148,7 @@ class MessageBoardServer():
                             group = message["BODY"]["GROUP"]
                             new_message = message["BODY"]["MESSAGE"]
 
-                            post_message(group, new_message)
+                            post_message(username, group, new_message)
 
                             response = copy.deepcopy(state.MESSAGE)
                             response['COMMAND'] = state.POST
@@ -155,7 +159,6 @@ class MessageBoardServer():
                             print("\tSending: %s" % (response))
 
                             client.send(encrypt(pickle.dumps(response)))
-                        # TODO : FIXED
                         else:
                             print("\'%s\' command not recognized." % (command))
                             client.close()
