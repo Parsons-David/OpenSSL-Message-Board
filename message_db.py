@@ -11,21 +11,22 @@ db = "db.json"
 # ex: return ["CS", "Math", "Physics", "Security", "Art", "Music", "Sports"]
 
 def build_dict():
-    json_file = open(db, 'a+')
-    string = json_file.read()
-    json_file.close()
-    if string == "":
-        return {}
-    else:
-        dict = json.loads(string)
-        return dict
+    with open(db, 'r+') as json_file:
+        string = json_file.read()
+        json_file.close()
+        if string == "":
+            return {}
+        else:
+            dict = json.loads(string)
+            return dict
 
 def write_file(board):
-    myfile = open(db, "a")
-    myfile.seek(0)
-    myfile.truncate()
-    myfile.write(json.dumps(board))
-    myfile.close()
+
+    with open(db, 'a') as myfile:    
+        myfile.seek(0)
+        myfile.truncate()
+        myfile.write(json.dumps(board))
+        myfile.close()
 
 def get_groups():
     grouplist = []
@@ -94,12 +95,12 @@ def main():
     
     print("getting")
     for mes in messages:
-        print mes
+        print(mes)
     
     print("getting groups")
     grouplist = get_groups()
     for g in grouplist:
-        print g
+        print(g)
 
 if __name__ == '__main__':
     main()
