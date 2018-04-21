@@ -3,6 +3,8 @@ import argparse, json
 import socket, threading, ssl
 import pickle
 import state, copy
+import random
+import hashlib
 import message_db as db
 import user_db as auth
 
@@ -22,6 +24,34 @@ def get_messages(group):
 # Pass through to message_db backend
 def post_message(username, group, message):
     db.post_message(username, group, message)
+
+def salt_hash_store(username, password):
+
+        # Create and add the salt to the username
+        ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        chars = []
+        for i in range(16):
+            chars.append(random.choice(ALPHABET))
+        chars = "".join(chars)
+
+        username = chars + username
+
+        # Create and add the salt to the password
+        chars = []
+        for i in range(16):
+            chars.append(random.choice(ALPHABET))
+        chars = "".join(chars)
+
+        password = chars + password
+
+        # Hash the username and password
+        secret_user = hashlib.sha256(username.encode('utf-8')).hexdigest()
+        secret_pass = hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+        with open("user_db.txt", 'a') as out:
+            out.write(secret_user + '\n')
+            out.write(secret_pass + '\n')
+
 
 # Correct Name?
 QUEUE_SIZE = 5
@@ -71,6 +101,7 @@ class MessageBoardServer():
         authenticated = False
         username = None
         BUFFER_SIZE = 1024
+
         while True:
             try:
                 message = pickle.loads(client.recv(BUFFER_SIZE))
@@ -152,7 +183,7 @@ class MessageBoardServer():
                     raise error('Client disconnected')
             except:
                 client.close()
-                return False
+                return False      
 
 if __name__ == "__main__":
     # parse all the arguments to the server
