@@ -24,7 +24,7 @@ def build_dict():
 
 def write_file(board):
 
-    with open(db, 'a') as myfile:    
+    with open(db, 'a') as myfile:
         myfile.seek(0)
         myfile.truncate()
         myfile.write(json.dumps(board))
@@ -34,11 +34,9 @@ def get_groups():
     grouplist = []
     lock.acquire()
     board = build_dict()
-    try:
-        for group in board:
-            grouplist.append(group)
-    finally:
-        lock.release()
+    for group in board:
+        grouplist.append(group)
+    lock.release()
     return grouplist
 
 # Returns an array of Dictonaries representing the messages stored
@@ -46,61 +44,54 @@ def get_groups():
 # The Dictonary structure can be seen above.
 def get_messages(group):
     # return db.get_messages(group)
-    
+
     pm = copy.deepcopy(state.get_message)
     pm["GROUP"] = group
     retval = []
     lock.acquire()
     board = build_dict()
-    try:
-        if group in board:
-            retval = copy.deepcopy(board[group])
-    finally:
-        lock.release()
+    if group in board:
+        retval = copy.deepcopy(board[group])
+    lock.release()
     return retval
 
 # Adds a new message to a given group, cretes the
 # group if it does not yet exist
 # DOES NOT RETURN ANYTHING
 def post_message(username, group, message):
-    
+
     pm = { "MESSAGE" : "" }
     pm["MESSAGE"] = message
     pm["USERNAME"] = username
-    pm["TIMESTAMP"] = datetime.datetime.now().time().isoformat()
-    
+    pm["TIMESTAMP"] = datetime.datetime.now().isoformat()
+
     lock.acquire()
-    try:
-        board = build_dict()
-        if group not in board:
-            board[group] = [pm]
-        else:
-            msglist = board[group]
-            msglist.append(pm)
-            board[group] = msglist
-        write_file(board)
-    finally:
-        lock.release()
-    
+    board = build_dict()
+    if group not in board:
+        board[group] = [pm]
+    else:
+        msglist = board[group]
+        msglist.append(pm)
+        board[group] = msglist
+    write_file(board)
+    lock.release()
+
 
 # Write your testing in here
 def main():
     print("posting.")
-    message = [{
-        "COMMAND" : "open",
-        "BODY" : "this is a test!"
-    }]
-    
+    message = "I'm fahad!"
+
     print(message)
-    
+
     post_message("fahad", "CS", message)
     post_message("fahad", "PIZZA", message)
     messages = get_messages("CS")
-    
+
     print("getting")
     for mes in messages:
         print(mes)
-    
+
     print("getting groups")
     grouplist = get_groups()
     for g in grouplist:

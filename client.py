@@ -5,12 +5,6 @@ import pickle
 import state, copy
 import ssl
 
-def encrypt(data):
-    return data
-
-def decrypt(data):
-    return data
-
 def print_groups(grps):
     if len(grps) < 1:
         return
@@ -19,6 +13,12 @@ def print_groups(grps):
         output += " - " + g
     print()
     print(output)
+
+def print_messages(messages):
+    for message in messages:
+        print()
+        print("%s - %s" % (message["USERNAME"], message["TIMESTAMP"]))
+        print("  %s" % (message["MESSAGE"]))
 
 def main():
     # parse all the arguments to the client
@@ -62,12 +62,12 @@ def main():
 
                 print("\tSending: %s" % (message))
 
-                ssl_sock.send(encrypt(pickle.dumps(message)))
+                ssl_sock.send(pickle.dumps(message))
 
                 # TODO : BUFFER_SIZE
                 data = ssl_sock.recv(BUFFER_SIZE)
 
-                response = pickle.loads(decrypt(data))
+                response = pickle.loads(data)
 
                 print("\tReceiving: %s" % (response))
 
@@ -88,15 +88,15 @@ def main():
                     message = copy.deepcopy(state.MESSAGE)
                     message['COMMAND'] = state.END
                     message['BODY'] = copy.deepcopy(state.end_message)
-                    print("\tSending: %s" % (message))
+                    # print("\tSending: %s" % (message))
 
-                    ssl_sock.send(encrypt(pickle.dumps(message)))
+                    ssl_sock.send(pickle.dumps(message))
 
                     # TODO : BUFFER_SIZE
                     data = ssl_sock.recv(BUFFER_SIZE)
-                    response = pickle.loads(decrypt(data))
+                    response = pickle.loads(data)
 
-                    print("\tReceiving: %s" % (response))
+                    # print("\tReceiving: %s" % (response))
 
                     if response['COMMAND'] != state.END:
                         print('END Reponse Error')
@@ -112,22 +112,22 @@ def main():
                     message['COMMAND'] = state.GET
                     message['BODY'] = copy.deepcopy(state.get_message)
                     message['BODY']['GROUP'] = target_group
-                    print("\tSending: %s" % (message))
+                    # print("\tSending: %s" % (message))
 
-                    ssl_sock.send(encrypt(pickle.dumps(message)))
+                    ssl_sock.send(pickle.dumps(message))
 
                     # TODO : BUFFER_SIZE
                     data = ssl_sock.recv(BUFFER_SIZE)
-                    response = pickle.loads(decrypt(data))
+                    response = pickle.loads(data)
 
-                    print("\tReceiving: %s" % (response))
+                    # print("\tReceiving: %s" % (response))
 
                     if response['COMMAND'] != state.GET:
                         print('GET Reponse Error')
                         print('Recieved Reponse to Command: %s' % (response["COMMAND"]))
                     GROUPS = response['BODY']['GROUPS']
                     messages = response['BODY']['MESSAGES']
-                    print(messages)
+                    print_messages(messages)
 
                 elif command == "POST":
                     print()
@@ -139,15 +139,15 @@ def main():
                     message['BODY'] = copy.deepcopy(state.post_message)
                     message['BODY']['GROUP'] = target_group
                     message['BODY']['MESSAGE'] = new_message
-                    print("\tSending: %s" % (message))
+                    # print("\tSending: %s" % (message))
 
-                    ssl_sock.send(encrypt(pickle.dumps(message)))
+                    ssl_sock.send(pickle.dumps(message))
 
                     # TODO : BUFFER_SIZE
                     data = ssl_sock.recv(BUFFER_SIZE)
-                    response = pickle.loads(decrypt(data))
+                    response = pickle.loads(data)
 
-                    print("\tReceiving: %s" % (response))
+                    # print("\tReceiving: %s" % (response))
 
                     if response['COMMAND'] != state.POST:
                         print('POST Reponse Error')

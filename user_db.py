@@ -1,21 +1,13 @@
 #!/usr/bin/python3
 
-# Encrypt raw bytes that will be decrypted on the
-# otherside of the network by the decrypt function
-def encrypt(data):
-    pass
-
-# Decrypt raw bytes that were encrypted on the
-# otherside of the network by the encrypt function
-def decrypt(data):
-    pass
-
 # Authenticate and/or create a user
 # With the given username and password
 # username_password = {
 #     "USERNAME" : "Bighead",
 #     "PASSWORD" : "username"
 # }
+# Returns true if the username password combo is valid
+# or if a new user has been created
 def authenticate(username_and_password):
     pass
 

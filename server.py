@@ -7,38 +7,21 @@ import message_db as db
 import user_db as auth
 
 # Pass through to user_db backend
-def encrypt(data):
-    # return auth.encrypt
-    return data
-
-# Pass through to user_db backend
-def decrypt(data):
-    # return auth.decrypt
-    return data
-
-# Pass through to user_db backend
 def authenticate(data):
     # return auth.authenticate(data)
     return True
 
 # Pass through to message_db backend
 def get_groups():
-    # return db.get_groups()
-    return ["CS", "Math", "Physics", "Security", "Art", "Music", "Sports"]
+    return db.get_groups()
 
 # Pass through to message_db backend
 def get_messages(group):
-    # return db.get_messages(group)
-    return [{
-        "USER": "PK",
-        "TIMESTAMP" : "NOW",
-        "MESSAGE" : "WHAT IS UP!!"
-    }]
+    return db.get_messages(group)
 
 # Pass through to message_db backend
 def post_message(username, group, message):
-    # return db.post_message(username, group, message)
-    pass
+    db.post_message(username, group, message)
 
 # Correct Name?
 QUEUE_SIZE = 5
@@ -90,7 +73,7 @@ class MessageBoardServer():
         BUFFER_SIZE = 1024
         while True:
             try:
-                message = pickle.loads(decrypt(client.recv(BUFFER_SIZE)))
+                message = pickle.loads(client.recv(BUFFER_SIZE))
                 if message:
                     print("\tReceiving: %s" % (message))
                     # Is client authenticated?
@@ -113,7 +96,7 @@ class MessageBoardServer():
                         response['BODY'] = a_rep
 
                         print("\tSending: %s" % (response))
-                        client.send(encrypt(pickle.dumps(response)))
+                        client.send(pickle.dumps(response))
 
                     # If Client is authenticated
                     else:
@@ -126,9 +109,9 @@ class MessageBoardServer():
                             response = copy.deepcopy(state.MESSAGE)
                             response['COMMAND'] = state.END
                             response['BODY'] = copy.deepcopy(state.end_response)
-                            print("\tSending: %s" % (response))
+                            # print("\tSending: %s" % (response))
 
-                            client.send(encrypt(pickle.dumps(response)))
+                            client.send(pickle.dumps(response))
 
                         elif command == "GET":
                             group = message["BODY"]["GROUP"]
@@ -141,14 +124,15 @@ class MessageBoardServer():
                             response['BODY']['MESSAGES'] = get_messages(group)
                             response['BODY']['GROUPS'] = get_groups()
 
-                            print("\tSending: %s" % (response))
+                            # print("\tSending: %s" % (response))
 
-                            client.send(encrypt(pickle.dumps(response)))
+                            client.send(pickle.dumps(response))
                         elif command == "POST":
                             group = message["BODY"]["GROUP"]
                             new_message = message["BODY"]["MESSAGE"]
 
                             post_message(username, group, new_message)
+
 
                             response = copy.deepcopy(state.MESSAGE)
                             response['COMMAND'] = state.POST
@@ -156,9 +140,9 @@ class MessageBoardServer():
 
                             response['BODY']['GROUPS'] = get_groups()
 
-                            print("\tSending: %s" % (response))
+                            # print("\tSending: %s" % (response))
 
-                            client.send(encrypt(pickle.dumps(response)))
+                            client.send(pickle.dumps(response))
                         else:
                             print("\'%s\' command not recognized." % (command))
                             client.close()
