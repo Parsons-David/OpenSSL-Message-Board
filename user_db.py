@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
-import random, hashlib
+import random, hashlib, threading
+
+lock = threading.Lock()
 
 # Authenticate and/or create a user
 # With the given username and password
@@ -20,6 +22,8 @@ def authenticate(username_and_password):
     getsalt = False;
     stored_password = ""
     salt = ""
+    
+    lock.acquire()    
 
     # First, check to see if the username already exists
     with open("user_db.txt") as db:
@@ -36,6 +40,8 @@ def authenticate(username_and_password):
                     nextline = True
             else:
                 found = False
+    
+    lock.release()
 
     # If the username doesn't already exist, salt, hash, and store the new credentials in the system, and authenticate
     if found:
@@ -66,12 +72,14 @@ def salt_hash_store(username, password):
     # Hash the password
     secret_pass = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
+    lock.acquire()
+
     with open("user_db.txt", 'a') as out:
         out.write(username + '\n')
         out.write(secret_pass + '\n')
         out.write(chars + '\n')
 
-
+    lock.release()
 
 # Write your testing in here
 def main():
