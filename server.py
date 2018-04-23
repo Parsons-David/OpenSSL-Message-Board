@@ -10,8 +10,7 @@ import user_db as auth
 
 # Pass through to user_db backend
 def authenticate(data):
-    # return auth.authenticate(data)
-    return True
+    return auth.authenticate(data)
 
 # Pass through to message_db backend
 def get_groups():
@@ -24,34 +23,6 @@ def get_messages(group):
 # Pass through to message_db backend
 def post_message(username, group, message):
     db.post_message(username, group, message)
-
-def salt_hash_store(username, password):
-
-        # Create and add the salt to the username
-        ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        chars = []
-        for i in range(16):
-            chars.append(random.choice(ALPHABET))
-        chars = "".join(chars)
-
-        username = chars + username
-
-        # Create and add the salt to the password
-        chars = []
-        for i in range(16):
-            chars.append(random.choice(ALPHABET))
-        chars = "".join(chars)
-
-        password = chars + password
-
-        # Hash the username and password
-        secret_user = hashlib.sha256(username.encode('utf-8')).hexdigest()
-        secret_pass = hashlib.sha256(password.encode('utf-8')).hexdigest()
-
-        with open("user_db.txt", 'a') as out:
-            out.write(secret_user + '\n')
-            out.write(secret_pass + '\n')
-
 
 # Correct Name?
 QUEUE_SIZE = 5
@@ -116,6 +87,7 @@ class MessageBoardServer():
                         u_and_p = message["BODY"]
 
                         authenticated = authenticate(u_and_p)
+                        print(authenticated)
 
                         a_rep = copy.deepcopy(state.authentication_response)
                         a_rep['AUTHENTICATED'] = authenticated

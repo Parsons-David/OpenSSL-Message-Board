@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import random, hashlib
+
 # Authenticate and/or create a user
 # With the given username and password
 # username_password = {
@@ -9,7 +11,67 @@
 # Returns true if the username password combo is valid
 # or if a new user has been created
 def authenticate(username_and_password):
-    pass
+    
+    username = username_and_password["USERNAME"]
+    password = username_and_password["PASSWORD"]
+
+    found = False;
+    nextline = False;
+    getsalt = False;
+    stored_password = ""
+    salt = ""
+
+    # First, check to see if the username already exists
+    with open("user_db.txt") as db:
+        for line in db:
+            if (line == (username + '\n')) or nextline:
+                if getsalt:
+                    salt = line[:-1]
+                    break
+                elif nextline:
+                    stored_password = line[:-1]
+                    getsalt = True
+                else:
+                    found = True
+                    nextline = True
+            else:
+                found = False
+
+    # If the username doesn't already exist, salt, hash, and store the new credentials in the system, and authenticate
+    if found:
+        password = salt + password
+
+        hash_pass = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        
+        if hash_pass == stored_password:
+            return True
+        else:
+            return False
+    else:
+        salt_hash_store(username, password)
+        return True    
+
+def salt_hash_store(username, password):
+
+    ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+    # Create and add the salt to the password
+    chars = []
+    for i in range(16):
+        chars.append(random.choice(ALPHABET))
+    chars = "".join(chars)
+
+    password = chars + password
+
+    # Hash the password
+    secret_pass = hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+    with open("user_db.txt", 'a') as out:
+        out.write(username + '\n')
+        out.write(secret_pass + '\n')
+        out.write(chars + '\n')
+
+
 
 # Write your testing in here
 def main():
