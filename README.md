@@ -24,3 +24,6 @@ Some things to note about our implementation/testing include:
   - Changing the server’s certificate information should cause the connection to be rejected and the client to exit
   - We also tried to access the password file from the client but could not find a way to do so
 
+Example Commands:
+
+![alt text](/img/GET.png)
