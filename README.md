@@ -26,17 +26,12 @@ Some things to note about our implementation/testing include:
 
 Example Commands:
 
-Run Server: \n
 ![runServer](/img/runServer.png)
 
-Run Client: \n
 ![runClient](/img/runClient.png)
 
-GET: \n
 ![GET](/img/GET.png)
 
-POST: \n
 ![POST](/img/POST.png)
 
-END: \n
 ![END](/img/END.png)
