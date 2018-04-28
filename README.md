@@ -26,17 +26,17 @@ Some things to note about our implementation/testing include:
 
 Example Commands:
 
-Start Server
-![alt text](/img/startServer.png)
+Run Server: \n
+![runServer](/img/runServer.png)
 
-Start Client
-![alt text](/img/startClient.png)
+Run Client: \n
+![runClient](/img/runClient.png)
 
-GET
-![alt text](/img/GET.png)
+GET: \n
+![GET](/img/GET.png)
 
-POST
-![alt text](/img/POST.png)
+POST: \n
+![POST](/img/POST.png)
 
-END
-![alt text](/img/END.png)
+END: \n
+![END](/img/END.png)
