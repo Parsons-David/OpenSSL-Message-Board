@@ -26,4 +26,17 @@ Some things to note about our implementation/testing include:
 
 Example Commands:
 
+Start Server
+![alt text](/img/startServer.png)
+
+Start Client
+![alt text](/img/startClient.png)
+
+GET
 ![alt text](/img/GET.png)
+
+POST
+![alt text](/img/POST.png)
+
+END
+![alt text](/img/END.png)
